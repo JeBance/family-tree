@@ -1,0 +1,1231 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+:root {
+    --bg: #f5f0e8;
+    --bg-dark: #e8e0d4;
+    --fg: #2d3a35;
+    --fg-muted: #6b7c74;
+    --accent: #2d4a3e;
+    --accent-light: #3d6a52;
+    --gold: #c9a66b;
+    --gold-light: #d4b87a;
+    --card: #fffdf9;
+    --card-border: #d4c8b8;
+    --shadow: rgba(45, 58, 53, 0.12);
+    --shadow-strong: rgba(45, 58, 53, 0.25);
+    --male: #4a7c9b;
+    --male-light: #6a9cbb;
+    --female: #9b6b7a;
+    --female-light: #bb8b9a;
+    --danger: #a85454;
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Source Sans 3', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 20% 30%, rgba(201, 166, 107, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(45, 74, 62, 0.06) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 Q35 15 30 25 Q25 15 30 5' fill='none' stroke='%23d4c8b8' stroke-width='0.5' opacity='0.3'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+.app {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: linear-gradient(180deg, var(--card) 0%, rgba(255,253,249,0.95) 100%);
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+    gap: 12px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+}
+
+.header-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(45, 74, 62, 0.25);
+}
+
+.btn-primary:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.3);
+}
+
+.btn-secondary {
+    background: var(--card);
+    color: var(--fg);
+    border: 1px solid var(--card-border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-dark);
+    border-color: var(--gold);
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #b86a6a;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background: rgba(255,253,249,0.85);
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--card-border);
+    margin: 0 6px;
+}
+
+.zoom-display {
+    font-size: 13px;
+    color: var(--fg-muted);
+    min-width: 45px;
+    text-align: center;
+}
+
+.canvas-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 166, 107, 0.03) 0%, transparent 70%);
+}
+
+.canvas-container:active {
+    cursor: grabbing;
+}
+
+.canvas {
+    position: absolute;
+    transform-origin: 0 0;
+    width: 10000px;
+    height: 10000px;
+}
+
+.connections-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.persons-layer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.person-card {
+    position: absolute;
+    width: 170px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 20px var(--shadow);
+    cursor: move;
+    transition: box-shadow 0.2s, transform 0.15s;
+    user-select: none;
+    touch-action: none;
+    z-index: 10;
+}
+
+.person-card:hover {
+    box-shadow: 0 8px 30px var(--shadow-strong);
+}
+
+.person-card.selected {
+    box-shadow: 0 0 0 3px var(--gold), 0 8px 30px var(--shadow-strong);
+}
+
+.person-card.dragging {
+    opacity: 0.95;
+    transform: scale(1.02);
+    z-index: 100;
+}
+
+.person-card.male {
+    border-top: 4px solid var(--male);
+}
+
+.person-card.female {
+    border-top: 4px solid var(--female);
+}
+
+.person-avatar {
+    width: 64px;
+    height: 64px;
+    margin: 14px auto 6px;
+    border-radius: 50%;
+    background: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid var(--card-border);
+    position: relative;
+}
+
+.person-card.male .person-avatar {
+    border-color: var(--male-light);
+}
+
+.person-card.female .person-avatar {
+    border-color: var(--female-light);
+}
+
+.person-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.person-avatar svg {
+    width: 28px;
+    height: 28px;
+    color: var(--fg-muted);
+}
+
+.photo-count {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: var(--gold);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--card);
+}
+
+.person-info {
+    padding: 0 14px 12px;
+    text-align: center;
+}
+
+.person-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.person-dates {
+    font-size: 11px;
+    color: var(--fg-muted);
+}
+
+.person-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px;
+    border-top: 1px solid var(--card-border);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.person-card:hover .person-actions {
+    opacity: 1;
+}
+
+.person-actions .btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    color: var(--fg-muted);
+}
+
+.person-actions .btn:hover {
+    background: var(--bg-dark);
+    color: var(--fg);
+}
+
+.empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    z-index: 5;
+}
+
+.empty-state svg {
+    width: 100px;
+    height: 100px;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--fg-muted);
+    margin-bottom: 20px;
+    max-width: 280px;
+}
+
+/* Modal base */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 58, 53, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s;
+}
+
+.modal-overlay.active .modal {
+    transform: translateY(0) scale(1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-close {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg-muted);
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--bg-dark);
+    color: var(--fg);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--card-border);
+}
+
+/* Form */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    margin-bottom: 5px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--fg);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 166, 107, 0.2);
+}
+
+.form-textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+.form-hint {
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-top: 3px;
+}
+
+/* Photos section */
+.photos-section {
+    margin-bottom: 16px;
+}
+
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.photo-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg-dark);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.photo-item:hover {
+    border-color: var(--gold);
+}
+
+.photo-item.main {
+    border-color: var(--gold);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-item .photo-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.photo-item:hover .photo-delete {
+    opacity: 1;
+}
+
+.photo-item .photo-delete svg {
+    width: 14px;
+    height: 14px;
+    color: #fff;
+}
+
+.photo-item .photo-main-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: var(--gold);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.photo-add-btn {
+    aspect-ratio: 1;
+    border: 2px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--fg-muted);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.photo-add-btn:hover {
+    border-color: var(--gold);
+    background: rgba(201, 166, 107, 0.05);
+}
+
+.photo-add-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.photo-add-btn span {
+    font-size: 11px;
+}
+
+/* Photo caption input */
+.photo-caption-input {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.7);
+    padding: 4px 6px;
+}
+
+.photo-caption-input input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 10px;
+    text-align: center;
+}
+
+.photo-caption-input input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+/* Relation list */
+.relation-list {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+}
+
+.relation-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.relation-item:hover {
+    background: var(--bg-dark);
+}
+
+.relation-item.selected {
+    background: rgba(201, 166, 107, 0.15);
+}
+
+.relation-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.relation-avatar svg {
+    width: 18px;
+    height: 18px;
+    color: var(--fg-muted);
+}
+
+.relation-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.relation-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.relation-name {
+    font-weight: 500;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.relation-dates {
+    font-size: 11px;
+    color: var(--fg-muted);
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--bg-dark);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--fg);
+}
+
+.tab.active {
+    background: var(--card);
+    color: var(--fg);
+    box-shadow: 0 1px 3px var(--shadow);
+}
+
+/* Context menu */
+.context-menu {
+    position: fixed;
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 30px var(--shadow-strong);
+    min-width: 160px;
+    padding: 6px 0;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
+    transform-origin: top left;
+    transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+}
+
+.context-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.context-menu-item:hover {
+    background: var(--bg-dark);
+}
+
+.context-menu-item svg {
+    width: 16px;
+    height: 16px;
+    color: var(--fg-muted);
+}
+
+.context-menu-item span {
+    font-size: 13px;
+}
+
+.context-menu-item.danger span {
+    color: var(--danger);
+}
+
+.context-menu-item.danger svg {
+    color: var(--danger);
+}
+
+.context-menu-divider {
+    height: 1px;
+    background: var(--card-border);
+    margin: 4px 0;
+}
+
+/* Toast */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    background: var(--fg);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    font-size: 14px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast.success {
+    background: var(--accent);
+}
+
+.toast.error {
+    background: var(--danger);
+}
+
+/* Install banner */
+.install-banner {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    color: #fff;
+    padding: 10px 16px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.install-banner.show {
+    display: flex;
+}
+
+.install-banner p {
+    font-size: 13px;
+}
+
+.install-banner .btn {
+    background: #fff;
+    color: var(--accent);
+    padding: 6px 14px;
+}
+
+/* View Modal (Person Profile) */
+.view-modal {
+    max-width: 600px;
+}
+
+.view-modal .modal-body {
+    padding: 0;
+}
+
+.view-header {
+    position: relative;
+    padding: 30px 30px 20px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(201, 166, 107, 0.08) 0%, transparent 100%);
+}
+
+.view-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    overflow: hidden;
+    border: 4px solid var(--card);
+    box-shadow: 0 4px 20px var(--shadow);
+    background: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.view-photo svg {
+    width: 50px;
+    height: 50px;
+    color: var(--fg-muted);
+}
+
+.view-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 4px;
+}
+
+.view-dates {
+    font-size: 14px;
+    color: var(--fg-muted);
+    margin-bottom: 16px;
+}
+
+.view-gallery-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-gallery-btn:hover {
+    background: var(--bg-dark);
+    border-color: var(--gold);
+}
+
+.view-gallery-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.view-content {
+    padding: 0 30px 30px;
+}
+
+.view-section {
+    margin-bottom: 24px;
+}
+
+.view-section:last-child {
+    margin-bottom: 0;
+}
+
+.view-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.view-notes {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--fg);
+    white-space: pre-wrap;
+}
+
+.view-notes-empty {
+    color: var(--fg-muted);
+    font-style: italic;
+}
+
+.view-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.view-info-item {
+    padding: 10px 12px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+}
+
+.view-info-label {
+    font-size: 11px;
+    color: var(--fg-muted);
+    margin-bottom: 2px;
+}
+
+.view-info-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fg);
+}
+
+/* Gallery Modal */
+.gallery-modal {
+    z-index: 1100;
+}
+
+.gallery-modal .modal {
+    max-width: 800px;
+    max-height: 85vh;
+}
+
+.gallery-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.gallery-main {
+    position: relative;
+    width: 100%;
+    max-height: 400px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg-dark);
+}
+
+.gallery-main img {
+    width: 100%;
+    height: 100%;
+    max-height: 400px;
+    object-fit: contain;
+}
+
+.gallery-main-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+}
+
+.gallery-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.gallery-nav-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--bg-dark);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.gallery-nav-btn:hover {
+    background: var(--card-border);
+}
+
+.gallery-nav-btn svg {
+    width: 20px;
+    height: 20px;
+    color: var(--fg);
+}
+
+.gallery-counter {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: var(--fg-muted);
+    padding: 0 16px;
+}
+
+.gallery-thumbs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.gallery-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+}
+
+.gallery-thumb:hover {
+    border-color: var(--card-border);
+}
+
+.gallery-thumb.active {
+    border-color: var(--gold);
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .header {
+        padding: 10px 12px;
+    }
+    
+    .logo-text {
+        font-size: 18px;
+    }
+    
+    .header-actions .btn span {
+        display: none;
+    }
+    
+    .toolbar {
+        padding: 8px;
+    }
+    
+    .person-card {
+        width: 145px;
+    }
+    
+    .person-avatar {
+        width: 52px;
+        height: 52px;
+    }
+    
+    .person-name {
+        font-size: 14px;
+    }
+    
+    .modal {
+        margin: 10px;
+        max-height: calc(100vh - 20px);
+    }
+    
+    .form-row, .form-row-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .photos-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .btn {
+        padding: 7px 12px;
+        font-size: 13px;
+    }
+    
+    .view-modal .view-header {
+        padding: 20px 20px 16px;
+    }
+    
+    .view-photo {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .view-name {
+        font-size: 24px;
+    }
+    
+    .view-content {
+        padding: 0 20px 20px;
+    }
+    
+    .view-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gallery-modal .modal {
+        max-width: 100%;
+        margin: 10px;
+    }
+    
+    .gallery-main {
+        max-height: 300px;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.person-card {
+    animation: fadeIn 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

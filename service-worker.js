@@ -4,7 +4,17 @@ const BASE_URL = '/family-tree/';
 const ASSETS = [
     BASE_URL,
     BASE_URL + 'index.html',
-    BASE_URL + 'manifest.json'
+    BASE_URL + 'styles.css',
+    BASE_URL + 'app.js',
+    BASE_URL + 'manifest.json',
+    BASE_URL + 'icons/icon-72x72.png',
+    BASE_URL + 'icons/icon-96x96.png',
+    BASE_URL + 'icons/icon-128x128.png',
+    BASE_URL + 'icons/icon-144x144.png',
+    BASE_URL + 'icons/icon-152x152.png',
+    BASE_URL + 'icons/icon-192x192.png',
+    BASE_URL + 'icons/icon-384x384.png',
+    BASE_URL + 'icons/icon-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {

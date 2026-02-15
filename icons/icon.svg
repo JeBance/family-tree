@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="64" fill="url(#grad1)"/>
+  <!-- Tree trunk -->
+  <rect x="220" y="280" width="72" height="160" rx="16" fill="#7c3aed"/>
+  <!-- Tree crown -->
+  <circle cx="256" cy="180" r="100" fill="#22c55e"/>
+  <circle cx="180" cy="220" r="70" fill="#16a34a"/>
+  <circle cx="332" cy="220" r="70" fill="#16a34a"/>
+  <circle cx="256" cy="120" r="60" fill="#4ade80"/>
+  <!-- Family members icons -->
+  <circle cx="200" cy="160" r="24" fill="#ffffff"/>
+  <circle cx="256" cy="130" r="24" fill="#ffffff"/>
+  <circle cx="312" cy="160" r="24" fill="#ffffff"/>
+  <!-- Connection lines -->
+  <path d="M200 184 L256 154 L312 184" stroke="#ffffff" stroke-width="4" fill="none"/>
+</svg>
