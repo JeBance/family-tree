@@ -856,11 +856,13 @@ window.openViewModal = async function(id) {
     html += '</div>' +
         '<div class="view-name">' + getFullName(person) + '</div>' +
         '<div class="view-dates">' + formatDatesFull(person) + '</div>';
-    
-    if (archivePhotos.length > 0) {
+
+    // Показываем кнопку архива, если есть фото (включая главное)
+    const totalPhotos = photos.length;
+    if (totalPhotos > 0) {
         html += '<button class="view-gallery-btn" onclick="openGalleryModal()">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-            'Архив фотографий (' + archivePhotos.length + ')' +
+            'Архив фотографий (' + totalPhotos + ')' +
         '</button>';
     }
     
