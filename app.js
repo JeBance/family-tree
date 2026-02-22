@@ -917,13 +917,6 @@ if (viewModalEditBtn) {
     viewModalEditBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const personId = currentViewPersonId; // Сохраняем ID перед закрытием
-        console.log('Edit button clicked, currentViewPersonId:', personId);
-        
-        if (!personId) {
-            alert('Ошибка: personId не установлен');
-            return;
-        }
-        
         closeViewModal();
         openEditPerson(personId);
     });
