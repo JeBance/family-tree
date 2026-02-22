@@ -203,11 +203,12 @@ function formatDatesShort(person) {
 function formatDatesFull(person) {
     const birth = formatDate(person.birthDate);
     const death = formatDate(person.deathDate);
-    
+    const isFemale = person.gender === 'female';
+
     if (!birth && !death) return 'Даты не указаны';
-    if (birth && !death) return 'Родился: ' + birth;
+    if (birth && !death) return (isFemale ? 'Родилась: ' : 'Родился: ') + birth;
     if (birth && death) return birth + ' — ' + death;
-    return 'Умер: ' + death;
+    return (isFemale ? 'Умерла: ' : 'Умер: ') + death;
 }
 
 function getFullName(person) {
