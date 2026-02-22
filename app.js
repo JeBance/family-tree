@@ -89,7 +89,20 @@ async function getAllPersons() {
         const transaction = db.transaction([STORE_PERSONS], 'readonly');
         const store = transaction.objectStore(STORE_PERSONS);
         const request = store.getAll();
-        request.onsuccess = () => resolve(request.result || []);
+        request.onsuccess = () => {
+            const persons = request.result || [];
+            // Миграция: добавляем avatarData для старых фото
+            persons.forEach(p => {
+                if (p.photos && Array.isArray(p.photos)) {
+                    p.photos.forEach(photo => {
+                        if (!photo.avatarData && photo.data) {
+                            photo.avatarData = photo.data;
+                        }
+                    });
+                }
+            });
+            resolve(persons);
+        };
         request.onerror = () => reject(request.error);
     });
 }
@@ -312,10 +325,12 @@ function renderPersonCard(person) {
     const dates = formatDatesShort(person);
     const photos = person.photos || [];
     const hasMultiplePhotos = photos.length > 1;
-    
+
     let avatarContent = '';
-    if (photos.length > 0 && photos[0].data) {
-        avatarContent = '<img src="' + photos[0].data + '" alt="' + getFullName(person) + '">';
+    if (photos.length > 0) {
+        // Используем avatarData для миниатюры (обрезанный аватар), если есть
+        const avatarSrc = photos[0].avatarData || photos[0].data;
+        avatarContent = '<img src="' + avatarSrc + '" alt="' + getFullName(person) + '">';
     } else {
         avatarContent = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     }
@@ -658,8 +673,10 @@ function renderPhotosGrid() {
 
     currentPhotos.forEach((photo, index) => {
         const isMain = index === 0;
+        // Для миниатюры в редакторе используем avatarData (обрезанный аватар)
+        const thumbSrc = photo.avatarData || photo.data;
         html += '<div class="photo-item ' + (isMain ? 'main' : '') + '" data-index="' + index + '">' +
-            '<img src="' + photo.data + '" alt="Фото">' +
+            '<img src="' + thumbSrc + '" alt="Фото">' +
             '<button class="photo-delete" onclick="deletePhoto(' + index + ', event)" title="Удалить">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
                     '<line x1="18" y1="6" x2="6" y2="18"/>' +
@@ -736,12 +753,14 @@ window.openCropEditor = function(index, event) {
 function handlePhotoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
+        const photoData = event.target.result;
         currentPhotos.push({
             id: generateId(),
-            data: event.target.result,
+            data: photoData, // Оригинальное фото
+            avatarData: photoData, // По умолчанию аватар = оригиналу
             caption: ''
         });
         renderPhotosGrid();
@@ -817,16 +836,17 @@ const viewModalBody = document.getElementById('viewModalBody');
 window.openViewModal = async function(id) {
     const person = await getPerson(id);
     if (!person) return;
-    
+
     currentViewPersonId = id;
     const photos = person.photos || [];
     const mainPhoto = photos.length > 0 ? photos[0] : null;
     const archivePhotos = photos.slice(1);
-    
+
     let html = '<div class="view-header">' +
         '<div class="view-photo">';
-    
+
     if (mainPhoto) {
+        // В профиле показываем оригинальное фото (data), а не обрезанный аватар
         html += '<img src="' + mainPhoto.data + '" alt="' + getFullName(person) + '">';
     } else {
         html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
@@ -1029,14 +1049,16 @@ function renderRelationList(personsList, selectedIds, multiSelect) {
     if (personsList.length === 0) {
         return '<p style="padding: 16px; text-align: center; color: var(--fg-muted);">Нет доступных персон</p>';
     }
-    
+
     return personsList.map(p => {
         const isSelected = selectedIds.includes(p.id);
         const photos = p.photos || [];
         let avatarContent = '';
-        
-        if (photos.length > 0 && photos[0].data) {
-            avatarContent = '<img src="' + photos[0].data + '" alt="">';
+
+        if (photos.length > 0) {
+            // Используем avatarData для миниатюры (обрезанный аватар), если есть
+            const avatarSrc = photos[0].avatarData || photos[0].data;
+            avatarContent = '<img src="' + avatarSrc + '" alt="">';
         } else {
             avatarContent = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
         }
@@ -1443,7 +1465,8 @@ avatarZoomSlider.addEventListener('input', (e) => {
 document.getElementById('avatarModalSave').addEventListener('click', () => {
     const croppedData = cropAvatarImage();
     if (croppedData && avatarCropCurrentPhotoIndex !== null) {
-        currentPhotos[avatarCropCurrentPhotoIndex].data = croppedData;
+        // Сохраняем обрезанную версию в avatarData, оригинал остаётся в data
+        currentPhotos[avatarCropCurrentPhotoIndex].avatarData = croppedData;
         renderPhotosGrid();
     }
     closeAvatarCropModal();
