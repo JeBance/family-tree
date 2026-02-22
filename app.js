@@ -3,10 +3,13 @@ const DB_NAME = 'FamilyTreeDB';
 const DB_VERSION = 2;
 const STORE_PERSONS = 'persons';
 const STORE_RELATIONS = 'relations';
-const CANVAS_WIDTH = 10000;
-const CANVAS_HEIGHT = 10000;
 const CARD_WIDTH = 170;
 const CARD_HEIGHT = 140;
+const CANVAS_PADDING = 500; // Отступ от края холста
+
+// Динамический размер холста
+let canvasWidth = 10000;
+let canvasHeight = 10000;
 
 // ========== State ==========
 let db = null;
@@ -30,6 +33,37 @@ let lastTranslateY = 0;
 let personDragId = null;
 let personDragStartX = 0;
 let personDragStartY = 0;
+
+// ========== Canvas Size Management ==========
+function updateCanvasSize() {
+    if (persons.length === 0) {
+        canvasWidth = 10000;
+        canvasHeight = 10000;
+    } else {
+        // Находим минимальные и максимальные координаты всех карточек
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+
+        persons.forEach(p => {
+            minX = Math.min(minX, p.x);
+            maxX = Math.max(maxX, p.x + CARD_WIDTH);
+            minY = Math.min(minY, p.y);
+            maxY = Math.max(maxY, p.y + CARD_HEIGHT);
+        });
+
+        // Добавляем отступы
+        canvasWidth = maxX + CANVAS_PADDING;
+        canvasHeight = maxY + CANVAS_PADDING;
+
+        // Минимальный размер
+        canvasWidth = Math.max(canvasWidth, 10000);
+        canvasHeight = Math.max(canvasHeight, 10000);
+    }
+
+    // Обновляем размеры canvas
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
+}
 
 // ========== Database ==========
 function openDatabase() {
@@ -414,14 +448,15 @@ function renderConnections() {
 async function render() {
     persons = await getAllPersons();
     relations = await getAllRelations();
-    
+
     emptyState.style.display = persons.length === 0 ? 'flex' : 'none';
     personsLayer.style.display = persons.length === 0 ? 'none' : 'block';
-    
+
     if (persons.length > 0) {
         personsLayer.innerHTML = persons.map(renderPersonCard).join('');
         renderConnections();
         initPersonDrag();
+        updateCanvasSize(); // Обновляем размер холста
     } else {
         connectionsLayer.innerHTML = '';
     }
@@ -488,25 +523,26 @@ function dragPerson(e) {
 
 async function endPersonDrag() {
     if (!personDragId) return;
-    
+
     const card = personsLayer.querySelector('[data-id="' + personDragId + '"]');
     if (card) {
         card.classList.remove('dragging');
-        
+
         const newX = parseInt(card.style.left) || 0;
         const newY = parseInt(card.style.top) || 0;
-        
+
         const person = persons.find(p => p.id === personDragId);
         if (person) {
             person.x = newX;
             person.y = newY;
             await savePerson(person);
+            updateCanvasSize(); // Обновляем размер холста
             renderConnections();
         }
     }
-    
+
     personDragId = null;
-    
+
     document.removeEventListener('mousemove', dragPerson);
     document.removeEventListener('mouseup', endPersonDrag);
     document.removeEventListener('touchmove', dragPerson);

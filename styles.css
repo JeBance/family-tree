@@ -203,8 +203,8 @@ body::before {
 .canvas {
     position: absolute;
     transform-origin: 0 0;
-    width: 10000px;
-    height: 10000px;
+    min-width: 10000px;
+    min-height: 10000px;
 }
 
 .connections-layer {
