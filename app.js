@@ -935,23 +935,27 @@ const galleryModalTitle = document.getElementById('galleryModalTitle');
 window.openGalleryModal = function() {
     const person = persons.find(p => p.id === currentViewPersonId);
     if (!person) return;
-    
-    const photos = (person.photos || []).slice(1);
-    if (photos.length === 0) return;
-    
+
+    // Добавляем главное фото (аватар) в начало галереи
+    const allPhotos = person.photos || [];
+    if (allPhotos.length === 0) return;
+
     currentGalleryIndex = 0;
     galleryModalTitle.textContent = 'Архив: ' + getFullName(person);
-    
-    renderGallery(photos);
+
+    renderGallery(allPhotos);
     galleryModal.classList.add('active');
 };
 
 function renderGallery(photos) {
     const photo = photos[currentGalleryIndex];
     if (!photo) return;
-    
+
+    // Для первого фото (аватара) используем avatarData, для остальных — data
+    const imgSrc = (currentGalleryIndex === 0 && photo.avatarData) ? photo.avatarData : photo.data;
+
     let html = '<div class="gallery-main">' +
-        '<img src="' + photo.data + '" alt="">' +
+        '<img src="' + imgSrc + '" alt="">' +
         (photo.caption ? '<div class="gallery-main-caption">' + photo.caption + '</div>' : '') +
     '</div>' +
     '<div class="gallery-nav">' +
@@ -964,22 +968,24 @@ function renderGallery(photos) {
         '</button>' +
     '</div>' +
     '<div class="gallery-thumbs">';
-    
+
     photos.forEach((p, i) => {
+        // Для миниатюр в галерее тоже используем avatarData для первого фото
+        const thumbSrc = (i === 0 && p.avatarData) ? p.avatarData : p.data;
         html += '<div class="gallery-thumb ' + (i === currentGalleryIndex ? 'active' : '') + '" onclick="galleryGoTo(' + i + ')">' +
-            '<img src="' + p.data + '" alt="">' +
+            '<img src="' + thumbSrc + '" alt="">' +
         '</div>';
     });
-    
+
     html += '</div>';
-    
+
     galleryContainer.innerHTML = html;
 }
 
 window.galleryPrev = function() {
     const person = persons.find(p => p.id === currentViewPersonId);
     if (!person) return;
-    const photos = (person.photos || []).slice(1);
+    const photos = person.photos || [];
     if (currentGalleryIndex > 0) {
         currentGalleryIndex--;
         renderGallery(photos);
@@ -989,7 +995,7 @@ window.galleryPrev = function() {
 window.galleryNext = function() {
     const person = persons.find(p => p.id === currentViewPersonId);
     if (!person) return;
-    const photos = (person.photos || []).slice(1);
+    const photos = person.photos || [];
     if (currentGalleryIndex < photos.length - 1) {
         currentGalleryIndex++;
         renderGallery(photos);
@@ -999,7 +1005,7 @@ window.galleryNext = function() {
 window.galleryGoTo = function(index) {
     const person = persons.find(p => p.id === currentViewPersonId);
     if (!person) return;
-    const photos = (person.photos || []).slice(1);
+    const photos = person.photos || [];
     currentGalleryIndex = index;
     renderGallery(photos);
 };
