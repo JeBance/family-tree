@@ -846,8 +846,9 @@ window.openViewModal = async function(id) {
         '<div class="view-photo">';
 
     if (mainPhoto) {
-        // В профиле показываем оригинальное фото (data), а не обрезанный аватар
-        html += '<img src="' + mainPhoto.data + '" alt="' + getFullName(person) + '">';
+        // В профиле показываем avatarData (обрезанный аватар), как на карточке
+        const avatarSrc = mainPhoto.avatarData || mainPhoto.data;
+        html += '<img src="' + avatarSrc + '" alt="' + getFullName(person) + '">';
     } else {
         html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     }
