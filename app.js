@@ -666,6 +666,13 @@ function renderPhotosGrid() {
                     '<line x1="6" y1="6" x2="18" y2="18"/>' +
                 '</svg>' +
             '</button>' +
+            '<button class="photo-crop" onclick="openCropEditor(' + index + ', event)" title="Редактировать аватар">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<circle cx="12" cy="12" r="10"/>' +
+                    '<path d="M12 2a10 10 0 0 1 10 10"/>' +
+                    '<path d="M12 12 L12 22"/>' +
+                '</svg>' +
+            '</button>' +
             (isMain ? '<span class="photo-main-badge">Основное</span>' : '') +
             (!isMain ? '<button class="photo-set-main" onclick="setPhotoAsMain(' + index + ', event)" title="Сделать основным">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -716,6 +723,14 @@ window.setPhotoAsMain = function(index, event) {
     const photo = currentPhotos.splice(index, 1)[0];
     currentPhotos.unshift(photo);
     renderPhotosGrid();
+};
+
+window.openCropEditor = function(index, event) {
+    event.stopPropagation();
+    const photo = currentPhotos[index];
+    if (photo && photo.data) {
+        openAvatarCropModal(index, photo.data);
+    }
 };
 
 function handlePhotoUpload(e) {
@@ -1226,6 +1241,220 @@ document.getElementById('helpBtn').addEventListener('click', () => {
         '• Кнопка "Просмотр" открывает профиль персоны\n' +
         '• Экспортируйте данные для резервного копирования\n' +
         '• Данные сохраняются локально в вашем браузере');
+});
+
+// ========== Avatar Crop Modal ==========
+const avatarModal = document.getElementById('avatarModal');
+const avatarCropCanvas = document.getElementById('avatarCropCanvas');
+const avatarCropCircle = document.getElementById('avatarCropCircle');
+const avatarCropHandle = document.getElementById('avatarCropHandle');
+const avatarZoomSlider = document.getElementById('avatarZoomSlider');
+
+let avatarCropImage = null;
+let avatarCropZoom = 1;
+let avatarCropOffsetX = 0;
+let avatarCropOffsetY = 0;
+let avatarCropCurrentPhotoIndex = null;
+let avatarCropIsDragging = false;
+let avatarCropDragStartX = 0;
+let avatarCropDragStartY = 0;
+
+const AVATAR_SIZE = 200; // Размер круга обрезки в пикселях
+const AVATAR_OUTPUT_SIZE = 128; // Размер выходного изображения
+
+function openAvatarCropModal(photoIndex, photoData) {
+    avatarCropCurrentPhotoIndex = photoIndex;
+    avatarCropImage = new Image();
+    avatarCropImage.onload = () => {
+        initAvatarCrop();
+    };
+    avatarCropImage.src = photoData;
+}
+
+function initAvatarCrop() {
+    const container = avatarCropCanvas.parentElement;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+
+    avatarCropCanvas.width = containerWidth;
+    avatarCropCanvas.height = containerHeight;
+
+    avatarCropZoom = 1;
+    avatarCropOffsetX = 0;
+    avatarCropOffsetY = 0;
+    avatarZoomSlider.value = 1;
+
+    drawAvatarCrop();
+    avatarModal.classList.add('active');
+}
+
+function drawAvatarCrop() {
+    if (!avatarCropImage) return;
+
+    const ctx = avatarCropCanvas.getContext('2d');
+    const canvasWidth = avatarCropCanvas.width;
+    const canvasHeight = avatarCropCanvas.height;
+
+    // Очистка
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    // Вычисляем размеры изображения с учётом зума
+    const imgAspect = avatarCropImage.width / avatarCropImage.height;
+    let drawWidth, drawHeight;
+
+    if (imgAspect > 1) {
+        drawWidth = canvasWidth * avatarCropZoom;
+        drawHeight = drawWidth / imgAspect;
+    } else {
+        drawHeight = canvasHeight * avatarCropZoom;
+        drawWidth = drawHeight * imgAspect;
+    }
+
+    // Центрируем изображение
+    const drawX = (canvasWidth - drawWidth) / 2 + avatarCropOffsetX;
+    const drawY = (canvasHeight - drawHeight) / 2 + avatarCropOffsetY;
+
+    // Рисуем изображение
+    ctx.drawImage(avatarCropImage, drawX, drawY, drawWidth, drawHeight);
+
+    // Рисуем затемнение вне круга
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    const circleX = canvasWidth / 2;
+    const circleY = canvasHeight / 2;
+    const circleRadius = AVATAR_SIZE / 2;
+
+    // Создаём путь для затемнения (всё кроме круга)
+    ctx.beginPath();
+    ctx.rect(0, 0, canvasWidth, canvasHeight);
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+}
+
+function cropAvatarImage() {
+    if (!avatarCropImage) return null;
+
+    const canvasWidth = avatarCropCanvas.width;
+    const canvasHeight = avatarCropCanvas.height;
+    const circleX = canvasWidth / 2;
+    const circleY = canvasHeight / 2;
+    const circleRadius = AVATAR_SIZE / 2;
+
+    // Вычисляем размеры изображения с учётом зума
+    const imgAspect = avatarCropImage.width / avatarCropImage.height;
+    let drawWidth, drawHeight;
+
+    if (imgAspect > 1) {
+        drawWidth = canvasWidth * avatarCropZoom;
+        drawHeight = drawWidth / imgAspect;
+    } else {
+        drawHeight = canvasHeight * avatarCropZoom;
+        drawWidth = drawHeight * imgAspect;
+    }
+
+    const drawX = (canvasWidth - drawWidth) / 2 + avatarCropOffsetX;
+    const drawY = (canvasHeight - drawHeight) / 2 + avatarCropOffsetY;
+
+    // Создаём временный canvas для обрезки
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = AVATAR_OUTPUT_SIZE;
+    tempCanvas.height = AVATAR_OUTPUT_SIZE;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Вычисляем координаты и размеры для обрезки
+    const sourceX = (drawX - circleX) * (avatarCropImage.width / canvasWidth) + (avatarCropImage.width / 2);
+    const sourceY = (drawY - circleY) * (avatarCropImage.height / canvasHeight) + (avatarCropImage.height / 2);
+    const sourceSize = (circleRadius * 2) * (avatarCropImage.width / canvasWidth);
+
+    // Рисуем круглое изображение
+    tempCtx.beginPath();
+    tempCtx.arc(AVATAR_OUTPUT_SIZE / 2, AVATAR_OUTPUT_SIZE / 2, AVATAR_OUTPUT_SIZE / 2, 0, Math.PI * 2);
+    tempCtx.closePath();
+    tempCtx.clip();
+
+    tempCtx.drawImage(
+        avatarCropImage,
+        sourceX - sourceSize / 2,
+        sourceY - sourceSize / 2,
+        sourceSize,
+        sourceSize,
+        0,
+        0,
+        AVATAR_OUTPUT_SIZE,
+        AVATAR_OUTPUT_SIZE
+    );
+
+    return tempCanvas.toDataURL('image/png');
+}
+
+function closeAvatarCropModal() {
+    avatarModal.classList.remove('active');
+    avatarCropImage = null;
+    avatarCropCurrentPhotoIndex = null;
+}
+
+// Обработчики событий редактора аватара
+avatarCropCanvas.addEventListener('mousedown', (e) => {
+    avatarCropIsDragging = true;
+    avatarCropDragStartX = e.clientX - avatarCropOffsetX;
+    avatarCropDragStartY = e.clientY - avatarCropOffsetY;
+    avatarCropCanvas.style.cursor = 'grabbing';
+});
+
+avatarCropCanvas.addEventListener('touchstart', (e) => {
+    avatarCropIsDragging = true;
+    const touch = e.touches[0];
+    avatarCropDragStartX = touch.clientX - avatarCropOffsetX;
+    avatarCropDragStartY = touch.clientY - avatarCropOffsetY;
+}, { passive: false });
+
+document.addEventListener('mousemove', (e) => {
+    if (!avatarCropIsDragging) return;
+    e.preventDefault();
+    avatarCropOffsetX = e.clientX - avatarCropDragStartX;
+    avatarCropOffsetY = e.clientY - avatarCropDragStartY;
+    drawAvatarCrop();
+});
+
+document.addEventListener('touchmove', (e) => {
+    if (!avatarCropIsDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    avatarCropOffsetX = touch.clientX - avatarCropDragStartX;
+    avatarCropOffsetY = touch.clientY - avatarCropDragStartY;
+    drawAvatarCrop();
+}, { passive: false });
+
+document.addEventListener('mouseup', () => {
+    avatarCropIsDragging = false;
+    avatarCropCanvas.style.cursor = 'move';
+});
+
+document.addEventListener('touchend', () => {
+    avatarCropIsDragging = false;
+});
+
+avatarZoomSlider.addEventListener('input', (e) => {
+    avatarCropZoom = parseFloat(e.target.value);
+    drawAvatarCrop();
+});
+
+document.getElementById('avatarModalSave').addEventListener('click', () => {
+    const croppedData = cropAvatarImage();
+    if (croppedData && avatarCropCurrentPhotoIndex !== null) {
+        currentPhotos[avatarCropCurrentPhotoIndex].data = croppedData;
+        renderPhotosGrid();
+    }
+    closeAvatarCropModal();
+    showToast('Аватар обновлён', 'success');
+});
+
+document.getElementById('avatarModalCancel').addEventListener('click', closeAvatarCropModal);
+document.getElementById('avatarModalClose').addEventListener('click', closeAvatarCropModal);
+
+avatarModal.addEventListener('click', (e) => {
+    if (e.target === avatarModal) closeAvatarCropModal();
 });
 
 // ========== PWA Install ==========

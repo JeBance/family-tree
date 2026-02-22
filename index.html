@@ -287,7 +287,41 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Avatar Crop Modal -->
+    <div class="modal-overlay avatar-modal" id="avatarModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Редактор аватара</h3>
+                <button class="modal-close" id="avatarModalClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-crop-container">
+                    <canvas id="avatarCropCanvas"></canvas>
+                    <div class="avatar-crop-circle" id="avatarCropCircle">
+                        <div class="avatar-crop-handle" id="avatarCropHandle"></div>
+                    </div>
+                </div>
+                <div class="avatar-crop-controls">
+                    <label class="crop-control">
+                        <span>Масштаб</span>
+                        <input type="range" id="avatarZoomSlider" min="0.5" max="3" step="0.01" value="1">
+                    </label>
+                </div>
+                <p class="form-hint" style="text-align: center;">Перетаскивайте изображение для позиционирования, используйте ползунок для масштабирования</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="avatarModalCancel">Отмена</button>
+                <button class="btn btn-primary" id="avatarModalSave">Применить</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
         <div class="context-menu-item" data-action="view">
