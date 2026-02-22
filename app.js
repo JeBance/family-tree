@@ -241,12 +241,40 @@ function updateCanvasTransform() {
 }
 
 function zoomIn() {
-    scale = Math.min(2, scale + 0.1);
+    const containerRect = canvasContainer.getBoundingClientRect();
+    const centerX = containerRect.width / 2;
+    const centerY = containerRect.height / 2;
+
+    const oldScale = scale;
+    const newScale = Math.min(2, oldScale + 0.1);
+
+    if (newScale === oldScale) return;
+
+    scale = newScale;
+    const scaleFactor = scale / oldScale;
+
+    translateX = centerX - (centerX - translateX) * scaleFactor;
+    translateY = centerY - (centerY - translateY) * scaleFactor;
+
     updateCanvasTransform();
 }
 
 function zoomOut() {
-    scale = Math.max(0.25, scale - 0.1);
+    const containerRect = canvasContainer.getBoundingClientRect();
+    const centerX = containerRect.width / 2;
+    const centerY = containerRect.height / 2;
+
+    const oldScale = scale;
+    const newScale = Math.max(0.25, oldScale - 0.1);
+
+    if (newScale === oldScale) return;
+
+    scale = newScale;
+    const scaleFactor = scale / oldScale;
+
+    translateX = centerX - (centerX - translateX) * scaleFactor;
+    translateY = centerY - (centerY - translateY) * scaleFactor;
+
     updateCanvasTransform();
 }
 
@@ -519,11 +547,25 @@ function endCanvasPan() {
 
 canvasContainer.addEventListener('wheel', (e) => {
     e.preventDefault();
-    if (e.deltaY < 0) {
-        zoomIn();
-    } else {
-        zoomOut();
-    }
+
+    const rect = canvasContainer.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const oldScale = scale;
+    const delta = e.deltaY < 0 ? 0.1 : -0.1;
+    const newScale = Math.min(2, Math.max(0.25, oldScale + delta));
+
+    if (newScale === oldScale) return;
+
+    scale = newScale;
+
+    const scaleFactor = scale / oldScale;
+
+    translateX = mouseX - (mouseX - translateX) * scaleFactor;
+    translateY = mouseY - (mouseY - translateY) * scaleFactor;
+
+    updateCanvasTransform();
 }, { passive: false });
 
 // ========== Context Menu ==========
