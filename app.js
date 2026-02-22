@@ -951,11 +951,9 @@ function renderGallery(photos) {
     const photo = photos[currentGalleryIndex];
     if (!photo) return;
 
-    // Для первого фото (аватара) используем avatarData, для остальных — data
-    const imgSrc = (currentGalleryIndex === 0 && photo.avatarData) ? photo.avatarData : photo.data;
-
+    // В галерее все фото отображаются в оригинальном качестве (data)
     let html = '<div class="gallery-main">' +
-        '<img src="' + imgSrc + '" alt="">' +
+        '<img src="' + photo.data + '" alt="">' +
         (photo.caption ? '<div class="gallery-main-caption">' + photo.caption + '</div>' : '') +
     '</div>' +
     '<div class="gallery-nav">' +
@@ -970,10 +968,9 @@ function renderGallery(photos) {
     '<div class="gallery-thumbs">';
 
     photos.forEach((p, i) => {
-        // Для миниатюр в галерее тоже используем avatarData для первого фото
-        const thumbSrc = (i === 0 && p.avatarData) ? p.avatarData : p.data;
+        // Миниатюры в галерее тоже показывают оригинал
         html += '<div class="gallery-thumb ' + (i === currentGalleryIndex ? 'active' : '') + '" onclick="galleryGoTo(' + i + ')">' +
-            '<img src="' + thumbSrc + '" alt="">' +
+            '<img src="' + p.data + '" alt="">' +
         '</div>';
     });
 
