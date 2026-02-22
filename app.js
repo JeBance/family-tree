@@ -911,10 +911,14 @@ function closeViewModal() {
 
 document.getElementById('viewModalClose').addEventListener('click', closeViewModal);
 document.getElementById('viewModalClose2').addEventListener('click', closeViewModal);
-document.getElementById('viewModalEdit').addEventListener('click', () => {
-    closeViewModal();
-    openEditPerson(currentViewPersonId);
-});
+
+const viewModalEditBtn = document.getElementById('viewModalEdit');
+if (viewModalEditBtn) {
+    viewModalEditBtn.addEventListener('click', () => {
+        closeViewModal();
+        openEditPerson(currentViewPersonId);
+    });
+}
 
 viewModal.addEventListener('click', (e) => {
     if (e.target === viewModal) closeViewModal();
@@ -1384,10 +1388,17 @@ function cropAvatarImage() {
     tempCanvas.height = AVATAR_OUTPUT_SIZE;
     const tempCtx = tempCanvas.getContext('2d');
 
-    // Вычисляем координаты и размеры для обрезки
-    const sourceX = (drawX - circleX) * (avatarCropImage.width / canvasWidth) + (avatarCropImage.width / 2);
-    const sourceY = (drawY - circleY) * (avatarCropImage.height / canvasHeight) + (avatarCropImage.height / 2);
-    const sourceSize = (circleRadius * 2) * (avatarCropImage.width / canvasWidth);
+    // Вычисляем координаты верхнего левого угла круга обрезки на canvas
+    const cropCircleLeft = circleX - circleRadius;
+    const cropCircleTop = circleY - circleRadius;
+
+    // Преобразуем координаты круга в координаты изображения
+    const scaleX = avatarCropImage.width / drawWidth;
+    const scaleY = avatarCropImage.height / drawHeight;
+
+    const sourceX = (cropCircleLeft - drawX) * scaleX;
+    const sourceY = (cropCircleTop - drawY) * scaleY;
+    const sourceSize = (circleRadius * 2) * scaleX;
 
     // Рисуем круглое изображение
     tempCtx.beginPath();
@@ -1397,8 +1408,8 @@ function cropAvatarImage() {
 
     tempCtx.drawImage(
         avatarCropImage,
-        sourceX - sourceSize / 2,
-        sourceY - sourceSize / 2,
+        sourceX,
+        sourceY,
         sourceSize,
         sourceSize,
         0,
