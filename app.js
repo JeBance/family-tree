@@ -655,9 +655,10 @@ function closePersonModal() {
 
 function renderPhotosGrid() {
     let html = '';
-    
+
     currentPhotos.forEach((photo, index) => {
-        html += '<div class="photo-item ' + (index === 0 ? 'main' : '') + '" data-index="' + index + '">' +
+        const isMain = index === 0;
+        html += '<div class="photo-item ' + (isMain ? 'main' : '') + '" data-index="' + index + '">' +
             '<img src="' + photo.data + '" alt="Фото">' +
             '<button class="photo-delete" onclick="deletePhoto(' + index + ', event)" title="Удалить">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -665,13 +666,18 @@ function renderPhotosGrid() {
                     '<line x1="6" y1="6" x2="18" y2="18"/>' +
                 '</svg>' +
             '</button>' +
-            (index === 0 ? '<span class="photo-main-badge">Основное</span>' : '') +
+            (isMain ? '<span class="photo-main-badge">Основное</span>' : '') +
+            (!isMain ? '<button class="photo-set-main" onclick="setPhotoAsMain(' + index + ', event)" title="Сделать основным">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' +
+                '</svg>' +
+            '</button>' : '') +
             '<div class="photo-caption-input">' +
                 '<input type="text" value="' + (photo.caption || '') + '" placeholder="Подпись..." onchange="updatePhotoCaption(' + index + ', this.value)">' +
             '</div>' +
         '</div>';
     });
-    
+
     html += '<label class="photo-add-btn" id="addPhotoBtn">' +
         '<input type="file" accept="image/*" id="photoInputNew" hidden>' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
@@ -680,9 +686,9 @@ function renderPhotosGrid() {
         '</svg>' +
         '<span>Добавить</span>' +
     '</label>';
-    
+
     photosGrid.innerHTML = html;
-    
+
     // Re-attach event listener
     const newPhotoInput = document.getElementById('photoInputNew');
     if (newPhotoInput) {
@@ -700,6 +706,16 @@ window.updatePhotoCaption = function(index, value) {
     if (currentPhotos[index]) {
         currentPhotos[index].caption = value;
     }
+};
+
+window.setPhotoAsMain = function(index, event) {
+    event.stopPropagation();
+    if (index === 0) return;
+    
+    // Перемещаем выбранное фото на первую позицию
+    const photo = currentPhotos.splice(index, 1)[0];
+    currentPhotos.unshift(photo);
+    renderPhotosGrid();
 };
 
 function handlePhotoUpload(e) {
